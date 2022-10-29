@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("results")
+@RequestMapping("/results")
 final class MultiplicationResultAttemptController {
 
     private final MultiplicationService multiplicationService;
@@ -38,5 +38,10 @@ final class MultiplicationResultAttemptController {
     ResponseEntity<List<MultiplicationResultAttempt>> getStatistics(@RequestParam("alias") String alias) {
         return ResponseEntity.ok(multiplicationService.getStatsForUser(alias)
         );
+    }
+
+    @GetMapping("/{resultId}")
+    ResponseEntity<MultiplicationResultAttempt> getResultById(@PathVariable("resultId") Long resultId) {
+        return ResponseEntity.ok(multiplicationService.getMultiplicationAttemptById(resultId));
     }
 }

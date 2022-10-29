@@ -29,4 +29,14 @@ public interface MultiplicationService {
      */
     List<MultiplicationResultAttempt> getStatsForUser(final String userAlias);
 
+    /**
+     * Get One Multiplication Result Attempt by resultId
+     *
+     * @param resultId the result's id
+     * @return an item of {@link MultiplicationResultAttempt} object through it's resultId.
+     */
+    MultiplicationResultAttempt getMultiplicationAttemptById(final Long resultId);
+
+
+
 }

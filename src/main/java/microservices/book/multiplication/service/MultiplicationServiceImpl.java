@@ -1,8 +1,11 @@
 package microservices.book.multiplication.service;
 
+import lombok.extern.slf4j.Slf4j;
 import microservices.book.multiplication.domain.Multiplication;
 import microservices.book.multiplication.domain.MultiplicationResultAttempt;
 import microservices.book.multiplication.domain.User;
+import microservices.book.multiplication.event.EventDispatcher;
+import microservices.book.multiplication.event.MultiplicationSolvedEvent;
 import microservices.book.multiplication.repository.MultiplicationRepository;
 import microservices.book.multiplication.repository.MultiplicationResultAttemptRepository;
 import microservices.book.multiplication.repository.UserRepository;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class MultiplicationServiceImpl implements MultiplicationService {
 
     private RandomGeneratorService randomGeneratorService;
@@ -25,15 +29,19 @@ public class MultiplicationServiceImpl implements MultiplicationService {
 
     private MultiplicationRepository multiplicationRepository;
 
+    private EventDispatcher eventDispatcher;
+
     @Autowired
-    public MultiplicationServiceImpl(RandomGeneratorService randomGeneratorService,
-                                     MultiplicationResultAttemptRepository attemptRepository,
-                                     UserRepository userRepository,
-                                     MultiplicationRepository multiplicationRepository) {
+    public MultiplicationServiceImpl(final RandomGeneratorService randomGeneratorService,
+                                     final MultiplicationResultAttemptRepository attemptRepository,
+                                     final UserRepository userRepository,
+                                     final MultiplicationRepository multiplicationRepository,
+                                     final EventDispatcher eventDispatcher) {
         this.randomGeneratorService = randomGeneratorService;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
         this.multiplicationRepository = multiplicationRepository;
+        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
@@ -70,12 +78,22 @@ public class MultiplicationServiceImpl implements MultiplicationService {
         //Stores the attempt
         attemptRepository.save(checkedAttempt);
 
+        eventDispatcher.send(new MultiplicationSolvedEvent(checkedAttempt.getId(),
+                checkedAttempt.getUser().getId(),
+                checkedAttempt.isCorrect())
+        );
+
         return isCorrect;
     }
 
     @Override
     public List<MultiplicationResultAttempt> getStatsForUser(String userAlias) {
         return attemptRepository.findTop5ByUserAliasOrderByIdDesc(userAlias);
+    }
+
+    @Override
+    public MultiplicationResultAttempt getMultiplicationAttemptById(Long resultId) {
+        return attemptRepository.findById(resultId).orElse(new MultiplicationResultAttempt());
     }
 
 }

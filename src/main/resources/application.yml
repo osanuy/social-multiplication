@@ -1,4 +1,9 @@
+server:
+  port: 8080
+
 spring:
+  application:
+    name: multiplication
   h2:
     console:
       enabled: true
@@ -11,3 +16,19 @@ spring:
   datasource:
     url: jdbc:h2:file:~/social-multiplication;DB_CLOSE_ON_EXIT=FALSE;
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+multiplication:
+  exchange: multiplication.exchange
+  solved:
+    key: multiplication.solved
+
+# Service Discovery configuration
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
